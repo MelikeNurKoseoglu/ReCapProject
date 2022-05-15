@@ -1,4 +1,7 @@
 ﻿using Business.Abstract;
+using Business.Constants;
+using Core.Utilities;
+using Core.Utilities.Results;
 using DataAccess.Abstract;
 using Entities.Concrete;
 using System;
@@ -18,38 +21,45 @@ namespace Business.Concrete
             _carDal = carDal;
         }
 
-        public void Add(Car car)
+        public IResult Add(Car car)
         {
             if (car.Description.Length>2 && car.DailyPrice>0)
             {
                 _carDal.Add(car);
-                Console.WriteLine("Araç eklemesi başarılı.");
-                return;
+                return new SuccessResult(Messages.CarAdded);
+                
             }
-            Console.WriteLine("Girilen araç hatalıdır.");
+            return new ErrorResult(Messages.CarNameInvalid);
         }
 
-        public void Delete(Car car)
+        public IResult Delete(Car car)
         {
             throw new NotImplementedException();
         }
 
-        public List<Car> GetAll()
+        public IDataResult<List<Car>> GetAll()
         {
-            return _carDal.GetAll();
+            if (DateTime.Now.Hour == 22)
+            {
+                return new ErrorDataResult<List<Car>>(Messages.MaintenanceTime);
+            }
+
+            return new SuccessDataResult<List<Car>>(_carDal.GetAll(), Messages.CarsListed);
+
+           
         }
 
-        public List<Car> GetCarsByBrandId(int id)
+        public IDataResult<List<Car>> GetCarsByBrandId(int id)
         {
-            return _carDal.GetAll(c=>c.CarId==id);
+            return new  SuccessDataResult<List<Car>>(_carDal.GetAll(c=>c.CarId==id));
         }
 
-        public List<Car> GetCarsByColorId(int id)
+        public IDataResult<List<Car>> GetCarsByColorId(int id)
         {
-            return _carDal.GetAll(c => c.ColorId== id);
+            return new SuccessDataResult <List<Car>>(_carDal.GetAll(c => c.ColorId== id));
         }
 
-        public void Update(Car car)
+        public IResult Update(Car car)
         {
             throw new NotImplementedException();
         }
